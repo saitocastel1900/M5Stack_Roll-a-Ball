@@ -9,5 +9,6 @@ public class InputEventInstaller : MonoInstaller
                 typeof(IInitializable), typeof(IDisposable))
             .To<KeyInputEventProvider>()
             .AsSingle();
+        
     }
 }
