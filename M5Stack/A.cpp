@@ -3,7 +3,7 @@
 #include <MadgwickAHRS.h>
 
 MPU9250 IMU;
-Madgwick filter;
+Madgwick filter; 
 
 void readAcc(float *ac) {
   ac[0] = 0.0;
@@ -12,9 +12,9 @@ void readAcc(float *ac) {
   if (IMU.readByte(MPU9250_ADDRESS, INT_STATUS) & 0x01) {
     IMU.readAccelData(IMU.accelCount);
     IMU.getAres();
-    ac[0] = (float)IMU.accelCount[0] * IMU.aRes;
-    ac[1] = (float)IMU.accelCount[1] * IMU.aRes;
-    ac[2] = (float)IMU.accelCount[2] * IMU.aRes;
+    ac[0] = IMU.ax = (float)IMU.accelCount[0] * IMU.aRes;
+    ac[1] = IMU.ay = (float)IMU.accelCount[1] * IMU.aRes;
+    ac[2] = IMU.az = (float)IMU.accelCount[2] * IMU.aRes;
   }
 }
 
@@ -39,27 +39,23 @@ void setup() {
   Wire.begin();
 
   IMU.initMPU9250();
-  IMU.calibrateMPU9250(IMU.gyroBias, IMU.accelBias);
   IMU.initAK8963(IMU.magCalibration);
-  filter.begin(10);
+  IMU.calibrateMPU9250(IMU.gyroBias, IMU.accelBias);
 
-  M5.Lcd.setTextSize(2);
-  M5.Lcd.setCursor(0,0);
-  M5.Lcd.println("MPU9250 / AK8963");
+  filter.begin(10); 
 }
 
 void loop() {
-  float ac[3], gy[3];
+  float ac[3],gy[3];
   readAcc(ac);
   readGyro(gy);
-  
-  filter.updateIMU(IMU.gx, IMU.gy, IMU.gz, IMU.ax, IMU.ay, IMU.az);
 
-  float roll = filter.getRoll();
-  float pitch = filter.getPitch();
-  float yaw = filter.getYaw();
-
-  Serial.printf("%5.2f,%5.2f,%5.2f\n", roll, pitch, yaw);
+  filter.updateIMU(gy[0], gy[1], gy[2], ac[0], ac[2], ac[3]);
+    float roll = filter.getRoll();
+    float pitch = filter.getPitch();
+    float yaw = filter.getYaw();
+  Serial.printf("%.10f,%.10f,%.10f\n", roll, pitch, yaw);
   Serial.println();
+
   delay(10);
 }
