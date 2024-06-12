@@ -5,6 +5,11 @@ using Zenject;
 public class ScoreTextPresenter : IDisposable, IInitializable
 {
     /// <summary>
+    /// 
+    /// </summary>
+    public IObservable<int> ScoreProp => _model.ScoreProp;
+    
+    /// <summary>
     /// Model
     /// </summary>
     private IScoreTextModel _model;
@@ -40,6 +45,8 @@ public class ScoreTextPresenter : IDisposable, IInitializable
     public void Initialize()
     {
         _compositeDisposable = new CompositeDisposable();
+        _view.Initialize();
+        
         Bind();
         SetEvent();
     }
@@ -61,7 +68,7 @@ public class ScoreTextPresenter : IDisposable, IInitializable
             .OnPickUpItemCallback
             .Subscribe(_ => _model.AddScore()).AddTo(_compositeDisposable);
     }
-
+    
     /// <summary>
     /// Dispose
     /// </summary>
