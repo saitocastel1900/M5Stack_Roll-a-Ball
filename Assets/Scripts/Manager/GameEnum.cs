@@ -1,9 +1,16 @@
+using System;
+
 public static class GameEnum
 {
+    /// <summary>
+    /// 状態
+    /// </summary>
+    [Flags]
     public enum State
     {
-        Initialize,
-        PlayeGame,
-        Finish
+        None      = 0,
+        ReadyAsync = 1,
+        Play      = 1 << 1,
+        Result    = 1 << 2,
     }
 }

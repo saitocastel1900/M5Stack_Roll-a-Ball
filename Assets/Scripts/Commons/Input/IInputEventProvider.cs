@@ -7,5 +7,5 @@
         /// 
         /// </summary>
         /// <returns></returns>
-        IReadOnlyReactiveProperty<Vector3> MoveDirection { get; }
+        IReadOnlyReactiveProperty<Vector3> InclinationDirection { get; }
     }
