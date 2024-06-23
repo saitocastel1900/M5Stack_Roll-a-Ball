@@ -8,7 +8,7 @@ public class BallMover : BaseBall
 
     protected override void OnInitialize()
     {
-        _input.InclinationDirection.Subscribe(direction =>
+        _input.InclinationAmount.Subscribe(direction =>
         {
             _characterController.Move(direction, speed);
         }).AddTo(this.gameObject);
