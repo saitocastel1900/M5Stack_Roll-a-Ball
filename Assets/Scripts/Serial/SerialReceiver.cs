@@ -19,6 +19,6 @@ public class SerialReceiver : MonoBehaviour
         float roll = Mathf.Atan2(-acceleration.x, acceleration.z) * Mathf.Rad2Deg;
 
         var targetRotation = Quaternion.Euler(pitch, 0, roll);
-        _object.transform.rotation = Quaternion.Lerp(_object.transform.rotation, targetRotation, .25f);
+        _object.transform.rotation = Quaternion.Lerp(_object.transform.rotation, targetRotation, .5f);
     }
 }
