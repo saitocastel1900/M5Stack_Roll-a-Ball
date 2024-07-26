@@ -1,6 +1,5 @@
 using System;
 using System.IO.Ports;
-using Cysharp.Threading.Tasks;
 using UniRx;
 using UnityEngine;
 
@@ -8,65 +7,68 @@ public class SerialHandler : MonoBehaviour
 {
     public IReactiveProperty<string> MessagesProp => _messagesProp;
     private ReactiveProperty<string> _messagesProp = new ReactiveProperty<string>();
-
-    [SerializeField] private string _portName;
-    [SerializeField] private int _baurate;
+    
+    [SerializeField]private string _portName;
+    [SerializeField]private int _baurate;
 
     private SerialPort _serialPort;
     private bool _isRunning = false;
 
-    private async void Start()
+    private void Start () 
     {
-        await Open();
+        Open();
     }
-
+	
     private void OnDestroy()
     {
         Close();
     }
 
-    private async UniTask Open()
+    /// <summary>
+    /// シリアル通信を開始する
+    /// </summary>
+    private void Open()
     {
-        _serialPort = new SerialPort(_portName, _baurate, Parity.None, 8, StopBits.One);
+        _serialPort = new SerialPort (_portName, _baurate, Parity.None, 8, StopBits.One);
 
         try
         {
             _serialPort.Open();
-            _isRunning = true;
-            await Read();
-        }
-        catch (Exception ex)
+            _isRunning  = true;
+            //別スレッドで実行  
+            Scheduler.ThreadPool.Schedule (Read).AddTo(this);
+        } 
+        catch(Exception ex)
         {
-            Debug.Log($"ポートが開けませんでした。設定しているポート名が間違っている場合があります: {ex.Message}");
+            Debug.Log ("ポートが開けませんでした。設定している値が間違っている場合があります");
         }
     }
-
-    private async UniTask Read()
+    
+    /// <summary>
+    /// データ受信時に呼ばれる
+    /// </summary>
+    private void Read()
     {
-        try
+        while (_isRunning && _serialPort != null && _serialPort.IsOpen)
         {
-            while (_isRunning && _serialPort != null && _serialPort.IsOpen)
-            {
-                var message = await UniTask.Run(() => _serialPort.ReadLine(),
-                    cancellationToken: this.GetCancellationTokenOnDestroy());
-                _messagesProp.SetValueAndForceNotify(message);
-            }
-        }catch (Exception ex)
-        {
-            Debug.LogError($"ポートがデータが読み取れませんでした: {ex.Message}");
+            //ReadLineで読み込む
+            string message = _serialPort.ReadLine();
+            _messagesProp.SetValueAndForceNotify(message);
         }
     }
-
-    void Close()
+    
+    /// <summary>
+    /// シリアル通信を終了する
+    /// </summary>
+    private void Close()
     {
         _isRunning = false;
         if (_serialPort != null)
         {
             if (_serialPort.IsOpen)
             {
-                _serialPort.Close();
+                _serialPort.Close();    
             }
-
             _serialPort.Dispose();
         }
     }
